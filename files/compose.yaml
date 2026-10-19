@@ -1,0 +1,32 @@
+# /opt/pve-mcp/compose.yaml
+# Mirrors the repo's "proxmox-mcp-http" service (docker-compose.yml, profile mcp-http) at tag v0.6.3,
+# with these deliberate changes:
+#   - publish ONLY on 127.0.0.1 (cloudflared in the same LXC reaches it there)
+#   - no unrelated proxmox-mcp-api service (its ${PROXMOX_API_KEY:?} requirement is not wanted)
+#   - no-new-privileges and cap_drop: ALL (the app runs as uid 1000 on port 8000 and needs no capabilities)
+# After a version update, change the image tag below to match the new release tag.
+name: pve-mcp
+services:
+  proxmox-mcp-http:
+    build:
+      context: ./ProxmoxMCP-Plus
+      dockerfile: Dockerfile
+    image: proxmoxmcp-plus:v0.6.3
+    container_name: pve-mcp
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PROXMOX_MCP_CONFIG: /app/proxmox-config/config.json
+      PROXMOX_JOBS_SQLITE_PATH: /app/data/proxmox-jobs.sqlite3
+      PROXMOX_MCP_MODE: mcp-http
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./proxmox-config:/app/proxmox-config:ro
+      - proxmox-jobs:/app/data
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+volumes:
+  proxmox-jobs:

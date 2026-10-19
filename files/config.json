@@ -1,0 +1,52 @@
+{
+  "targets": {
+    "pve": {
+      "host": "<PVE_IP>",
+      "port": 8006,
+      "timeout": 30,
+      "verify_ssl": true,
+      "allow_insecure_tls": false,
+      "service": "PVE",
+      "kind": "standalone",
+      "readonly": true,
+      "auth": {
+        "user": "mcp-ro@pve",
+        "token_name": "<TOKEN_NAME>",
+        "token_value": "<TOKEN_SECRET>"
+      },
+      "command_policy": {
+        "mode": "deny_all",
+        "require_approval_token": false,
+        "high_risk_mode": "enforce",
+        "high_risk_require_approval_token": true
+      }
+    }
+  },
+  "mcp": {
+    "transport": "STREAMABLE",
+    "host": "0.0.0.0",
+    "port": 8000,
+    "dns_rebinding_protection": true,
+    "allowed_hosts": [
+      "<MCP_HOSTNAME>",
+      "<MCP_HOSTNAME>:*",
+      "127.0.0.1:*",
+      "localhost:*"
+    ],
+    "allow_unauthenticated_http": false,
+    "client_permissions": {
+      "_shared_key": {
+        "tools": ["*"],
+        "targets": ["pve"]
+      }
+    }
+  },
+  "logging": { "level": "INFO" },
+  "security": { "dev_mode": false },
+  "command_policy": {
+    "mode": "deny_all",
+    "require_approval_token": false,
+    "high_risk_mode": "enforce",
+    "high_risk_require_approval_token": true
+  }
+}

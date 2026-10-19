@@ -1,0 +1,40 @@
+#!/bin/bash
+# pve-mcp-bridge: start the stdio to Streamable HTTP bridge (pve_mcp_bridge.py)
+# with a pinned MCP Python SDK, using uv.
+#
+# Author: Tempus Thales
+# License: MIT
+#
+# Needs these env vars (set them in your MCP client config):
+#   PVE_MCP_URL, PVE_MCP_CF_CLIENT_ID, PVE_MCP_CF_CLIENT_SECRET, PVE_MCP_API_KEY
+# Optional:
+#   UV_BIN          full path to uv, if it is not on PATH
+#   PVE_MCP_PYTHON  Python version for uv to use (default 3.13)
+#
+# stdout carries the MCP protocol. Never print anything to stdout here.
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+bridge="${script_dir}/pve_mcp_bridge.py"
+
+if [[ ! -f "${bridge}" ]]; then
+    echo "pve-mcp-bridge: ${bridge} not found (keep it next to this script)" >&2
+    exit 1
+fi
+
+# GUI apps often start with a short PATH, so also look in uv's default install folders.
+uv_bin="${UV_BIN:-}"
+if [[ -z "${uv_bin}" ]]; then
+    if command -v uv >/dev/null 2>&1; then
+        uv_bin="$(command -v uv)"
+    elif [[ -x "${HOME}/.local/bin/uv" ]]; then
+        uv_bin="${HOME}/.local/bin/uv"
+    elif [[ -x "${HOME}/.cargo/bin/uv" ]]; then
+        uv_bin="${HOME}/.cargo/bin/uv"
+    else
+        echo "pve-mcp-bridge: uv not found. Install it or set UV_BIN." >&2
+        exit 1
+    fi
+fi
+
+exec "${uv_bin}" run --quiet --no-project --python "${PVE_MCP_PYTHON:-3.13}" --with 'mcp==1.30.0' "${bridge}"

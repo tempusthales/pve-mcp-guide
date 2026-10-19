@@ -1,0 +1,32 @@
+# Secrets: never commit these
+.env
+.env.*
+!.env.example
+!files/.env.example
+*.pem
+*.key
+*.crt
+cert.pem
+*.json.bak
+
+# Real config files. Only the placeholder copy in files/ is tracked.
+config.json
+!files/config.json
+claude_desktop_config.json
+.mcp.json
+
+# cloudflared credentials and personal notes
+.cloudflared/
+my-values.md
+
+# Python and tooling
+__pycache__/
+*.pyc
+.venv/
+.uv/
+
+# Editors and OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
